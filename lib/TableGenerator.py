@@ -10,8 +10,7 @@ class TableGenerator:
     def __init__(self, config: Config):
         self.config = config
         self.console = Console()
-
-        self.headings = ['Date'] + self.config.getPrettyPlatforms() + ['Total']
+        self.headings = ['Period'] + self.config.getPrettyPlatforms() + ['Total']
         self.table = Table(*self.headings)
 
     def print(self):
@@ -25,13 +24,21 @@ class TableGenerator:
 
             self.table.add_row(*row)
 
-        self.table.add_row('---')
+        self.table.add_row('-')
+        self.table.add_row(*self.__createXirrRow(platforms))
         self.table.add_row(*self.__createTotalsRow(platforms))
 
+    def __createXirrRow(self, platforms: [Platform]):
+        row = ['xirr (%)']
+
+        for p in platforms:
+            row.append(str(p.calculateXirr()))
+
+        return row
     def __createTotalsRow(self, platforms: [Platform]):
         row = ['TOTAL']
         for p in platforms:
-            row.append(str(p.calculateReturnBy()))
+            row.append(str(p.calculateReturn()))
 
         row.append(self.__getRowSum(row))
 
@@ -44,11 +51,9 @@ class TableGenerator:
             row.append(period.start.strftime('%B %Y'))
             for platform in platforms:
                 period.fill(platform.valuations, platform.transactions)
-
-                row.append(str(period.calculateReturnBy()))
+                row.append(str(period.calculateReturn()))
 
             row.append(self.__getRowSum(row))
-
             rows.append(row)
 
         return rows

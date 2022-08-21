@@ -1,4 +1,5 @@
 import datetime
+from termgraph import termgraph
 
 from lib.Config import Config
 from lib.TableGenerator import TableGenerator

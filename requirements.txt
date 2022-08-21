@@ -10,3 +10,6 @@ six @ file:///AppleInternal/BuildRoot/Library/Caches/com.apple.xbs/Sources/pytho
 typer==0.6.1
 typing_extensions==4.3.0
 xirr==0.1.8
+
+pyxirr~=0.7.2
+termgraph~=0.5.3
