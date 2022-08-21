@@ -8,6 +8,9 @@ class Group:
         self.valuations = None
         self.transactions = None
 
+    def calculateBalance(self):
+        return sum(map(lambda t: t.value, self.transactions))
+
     def calculateXirr(self):
         interestTransaction = Transaction(self.valuations[-1].date, -self.valuations[-1].value)
         flows = self.transactions + [interestTransaction]
