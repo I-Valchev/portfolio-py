@@ -1,0 +1,11 @@
+platforms:
+  bondora:
+    pretty: 'Bondora'
+  peerberry:
+    pretty: 'PeerBerry'
+  mintos:
+    pretty: 'Mintos'
+  robocash:
+    pretty: 'Robocash'
+  lendermarket:
+    pretty: 'Lendermarket'
