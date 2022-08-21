@@ -24,7 +24,7 @@ class TableGenerator:
 
             self.table.add_row(*row)
 
-        self.table.add_row('-')
+        self.table.add_row('')
         self.table.add_row(*self.__createTotalsRow(platforms))
         self.table.add_row(*self.__createInvestedRow(platforms))
         self.table.add_row(*self.__createValueRow(platforms))
