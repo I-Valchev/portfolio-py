@@ -9,3 +9,7 @@ platforms:
     pretty: 'Robocash'
   lendermarket:
     pretty: 'Lendermarket'
+  bondora-v:
+    pretty: 'Bondora V'
+  iuvo:
+    pretty: 'Iuvo'

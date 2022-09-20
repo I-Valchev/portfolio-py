@@ -20,6 +20,10 @@ class Platform(Group):
         self.__fillInitialValuation(self.transactions)
 
     def __fillInitialValuation(self, transactions: [Transaction]):
+
+        if not self.valuations:
+            return
+
         valuation = self.valuations[0]
         transactionsBeforeValuation = list(filter(lambda t: t.date <= valuation.date, transactions))
 
