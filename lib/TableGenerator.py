@@ -30,6 +30,7 @@ class TableGenerator:
         self.table.add_row(*self.__createValueRow(platforms))
         self.table.add_row('')
         self.table.add_row(*self.__createXirrRow(platforms))
+        self.table.add_row(*self.__createUnrealisedGainLossRow(platforms))
 
     def __createValueRow(self, platforms: [Platform]):
         row = ['Value']
@@ -54,6 +55,14 @@ class TableGenerator:
 
         for p in platforms:
             row.append(str(p.calculateXirr()))
+
+        return row
+
+    def __createUnrealisedGainLossRow(self, platforms: [Platform]):
+        row = ['Unrealised Gain/Loss (%)']
+
+        for p in platforms:
+            row.append(str(p.unrealisedGainLoss()))
 
         return row
 
