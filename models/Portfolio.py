@@ -7,9 +7,6 @@ class Portfolio:
     def __init__(self, config: Config):
         self.platforms = generatePlatforms(config)
 
-    def getPlatforms(self):
-        return self.platforms
-
     def calculateTotalUnrealizedGainLoss(self):
         """
         Calculates the unrealized gain/loss percentage for the entire portfolio,
