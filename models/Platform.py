@@ -12,7 +12,7 @@ class Platform(Group):
         self.name = name
 
         # Use config to get the portfolio directory
-        portfolio_dir = config.getPortfolio()
+        portfolio_dir = config.getPortfolioDir()
 
         # Construct the paths for valuations and transactions based on portfolio directory
         valuationsFilename = os.path.join(portfolio_dir, f"{self.name}-valuations.txt")

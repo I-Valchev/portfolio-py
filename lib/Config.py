@@ -4,18 +4,18 @@ import os
 
 class Config:
     def __init__(self, portfolio):
-        # Construct the path dynamically based on the portfolio folder
-        config_path = os.path.join(portfolio, 'config.yaml')
-        
-        # Open the config.yaml file from the portfolio directory
+        self.portfolio = portfolio
+        config_path = os.path.join(self.getPortfolioDir(), 'config.yaml')
+
         with open(config_path, 'r') as file:
             self.config = yaml.load(file, Loader=yaml.FullLoader)
-        
-        # Store the portfolio name
-        self.portfolio = portfolio
+
+    def getPortfolioDir(self):
+        """Returns the directory path for the selected portfolio."""
+        return os.path.join('data', self.portfolio)
 
     def getPrettyPlatforms(self):
-        return list(map(lambda p: p['pretty'], self.config['platforms'].values()))
+        return [p['pretty'] for p in self.config['platforms'].values()]
 
     def getPlatforms(self):
         return self.config['platforms'].keys()

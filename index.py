@@ -9,7 +9,7 @@ from lib.helpers import generateAllPeriods, generatePlatforms
 
 # Parse command-line arguments
 parser = argparse.ArgumentParser(description="Investment portfolio tracker.")
-parser.add_argument('-p', '--portfolio', type=str, default="data", help="Name of the portfolio folder (default is 'data')")
+parser.add_argument('-p', '--portfolio', type=str, default="portfolio", help="Name of the portfolio folder (default is 'portfolio')")
 args = parser.parse_args()
 
 # Load the config
