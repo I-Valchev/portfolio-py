@@ -19,5 +19,5 @@ def generateAllPeriods(start, end):
 
 def generatePlatforms(config: Config):
     names = config.getPlatforms()
-    return list(map(lambda name: Platform(name), names))
+    return list(map(lambda name: Platform(name, config), names))
 

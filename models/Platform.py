@@ -4,23 +4,27 @@ from models.Valuation import Valuation
 from parsers.TransactionParser import TransactionParser
 from parsers.ValuationParser import ValuationParser
 from dateutil.relativedelta import relativedelta
-
+import os
 
 class Platform(Group):
-    def __init__(self, name):
+    def __init__(self, name, config):
         super().__init__()
         self.name = name
 
-        valuationsFilename = """./data/%s-valuations.txt""" % self.name
-        self.valuations = ValuationParser(valuationsFilename).parse()
+        # Use config to get the portfolio directory
+        portfolio_dir = config.getPortfolio()
 
-        transactionsFilename = """./data/%s-transactions.txt""" % self.name
+        # Construct the paths for valuations and transactions based on portfolio directory
+        valuationsFilename = os.path.join(portfolio_dir, f"{self.name}-valuations.txt")
+        transactionsFilename = os.path.join(portfolio_dir, f"{self.name}-transactions.txt")
+        
+        # Parse the valuations and transactions using the new paths
+        self.valuations = ValuationParser(valuationsFilename).parse()
         self.transactions = self._qualifyTransactions(TransactionParser(transactionsFilename).parse())
 
         self.__fillInitialValuation(self.transactions)
 
     def __fillInitialValuation(self, transactions: [Transaction]):
-
         if not self.valuations:
             return
 
