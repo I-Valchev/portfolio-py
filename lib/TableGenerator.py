@@ -8,91 +8,74 @@ from models.Portfolio import Portfolio
 
 
 class TableGenerator:
-    def __init__(self, config: Config):
-        self.config = config
-        self.console = Console()
-        self.headings = ['Period'] + self.config.getPrettyPlatforms() + ['Total']
-        self.table = Table(*self.headings)
+	def __init__(self, config: Config):
+		self.config = config
+		self.console = Console()
+		self.headings = ['Period'] + self.config.getPrettyPlatforms() + ['Total']
+		self.table = Table(*self.headings)
 
-    def print(self):
-        self.console.print(self.table)
+	def print(self):
+		self.console.print(self.table)
 
-    def setRows(self, periods: [Period], portfolio: Portfolio):
-        platforms = portfolio.getPlatforms()  # Get the list of platforms from the Portfolio object
-        rows = self.__initRows(periods, platforms)
-        for i, row in enumerate(rows[::-1]):
-            if i > 12:
-                break
+	def setRows(self, periods: [Period], portfolio: Portfolio):
+		platforms = portfolio.getPlatforms()  # Get the list of platforms from the Portfolio object
+		rows = self.__initRows(periods, platforms)
+		for i, row in enumerate(rows[::-1]):
+			if i > 12:
+				break
 
-            self.table.add_row(*row)
+			self.table.add_row(*row)
 
-        self.table.add_row('')
-        self.table.add_row(*self.__createTotalsRow(platforms))
-        self.table.add_row(*self.__createInvestedRow(platforms))
-        self.table.add_row(*self.__createValueRow(platforms))
-        self.table.add_row('')
-        self.table.add_row(*self.__createXirrRow(platforms))
-        self.table.add_row(*self.__createUnrealisedGainLossRow(portfolio))  # Pass portfolio instead of platforms
+		self.table.add_row('')
+		self.table.add_row(*self.__createTotalsRow(platforms))
+		self.table.add_row(*self.__createInvestedRow(platforms))
+		self.table.add_row(*self.__createValueRow(platforms))
+		self.table.add_row('')
+		self.table.add_row(*self.__createXirrRow(platforms))
+		self.table.add_row(*self.__createUnrealisedGainLossRow(portfolio))  # Pass portfolio instead of platforms
 
-    def __createValueRow(self, platforms: [Platform]):
-        row = ['Value']
-        for p in platforms:
-            row.append(str(p.calculateBalance() + p.calculateReturn()))
+	def __createRow(self, label: str, platforms: [Platform], calc_func):
+		"""Helper method to create a row for various calculations."""
+		row = [label]
+		row.extend(str(calc_func(p)) for p in platforms)
+		return row
 
-        row.append(self.__getRowSum(row))
+	def __createValueRow(self, platforms: [Platform]):
+		"""Creates the Value row for the table."""
+		return self.__createRow('Value', platforms, lambda p: p.calculateBalance() + p.calculateReturn())
 
-        return row
+	def __createInvestedRow(self, platforms: [Platform]):
+		"""Creates the Invested row for the table."""
+		return self.__createRow('Invested', platforms, lambda p: p.calculateBalance())
 
-    def __createInvestedRow(self, platforms: [Platform]):
-        row = ['Invested']
-        for p in platforms:
-            row.append(str(p.calculateBalance()))
+	def __createXirrRow(self, platforms: [Platform]):
+		"""Creates the xirr row for the table."""
+		return self.__createRow('xirr (%)', platforms, lambda p: p.calculateXirr())
 
-        row.append(self.__getRowSum(row))
+	def __createUnrealisedGainLossRow(self, portfolio: Portfolio):
+		"""Creates the Unrealised Gain/Loss row for the table."""
+		row = ['Unrealised Gain/Loss (%)']
+		row.extend(str(p.unrealisedGainLoss()) for p in portfolio.getPlatforms())
+		row.append(str(portfolio.calculateTotalUnrealizedGainLoss()))
+		return row
 
-        return row
+	def __createTotalsRow(self, platforms: [Platform]):
+		"""Creates the Earned row for the table."""
+		return self.__createRow('Earned', platforms, lambda p: p.calculateReturn())
 
-    def __createXirrRow(self, platforms: [Platform]):
-        row = ['xirr (%)']
+	def __initRows(self, periods: [Period], platforms: [Platform]):
+		rows = []
+		for period in periods:
+			row = []
+			row.append(period.start.strftime('%B %Y'))
+			for platform in platforms:
+				period.fill(platform.valuations, platform.transactions)
+				row.append(str(period.calculateReturn()))
 
-        for p in platforms:
-            row.append(str(p.calculateXirr()))
+			row.append(self.__getRowSum(row))
+			rows.append(row)
 
-        return row
+		return rows
 
-    def __createUnrealisedGainLossRow(self, portfolio: Portfolio):
-        row = ['Unrealised Gain/Loss (%)']
-
-        # Calculate unrealised gain/loss for each platform and add to row
-        for p in portfolio.getPlatforms():
-            row.append(str(p.unrealisedGainLoss()))
-
-        row.append(str(portfolio.calculateTotalUnrealizedGainLoss()))  # Add total portfolio unrealized gain/loss
-
-        return row
-
-    def __createTotalsRow(self, platforms: [Platform]):
-        row = ['Earned']
-        for p in platforms:
-            row.append(str(p.calculateReturn()))
-
-        row.append(self.__getRowSum(row))
-
-        return row
-
-    def __initRows(self, periods: [Period], platforms: [Platform]):
-        rows = []
-        for period in periods:
-            row = []
-            row.append(period.start.strftime('%B %Y'))
-            for platform in platforms:
-                period.fill(platform.valuations, platform.transactions)
-                row.append(str(period.calculateReturn()))
-
-            row.append(self.__getRowSum(row))
-            rows.append(row)
-
-        return rows
-
-    def __getRowSum(self, row: []):
-        return str(sum(map(lambda v: decimal.Decimal(v), row[1:])))
+	def __getRowSum(self, row: []):
+		return str(sum(map(lambda v: decimal.Decimal(v), row[1:])))
