@@ -15,9 +15,6 @@ class Portfolio:
         total_value = sum(p.calculateBalance() + p.calculateReturn() for p in self.platforms)
         total_invested = sum(p.calculateBalance() for p in self.platforms)
 
-        print(total_value)
-        print(total_invested)
-
         if total_invested > 0:
             unrealized_gain_loss = (total_value - total_invested) / total_invested * 100
         else:
