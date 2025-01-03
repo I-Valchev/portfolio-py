@@ -45,7 +45,8 @@ class TableGenerator:
         values = [str(calc_func(p)) for p in platforms]
         row.extend(values)
         if add_total:
-            row.append(self.__getRowSum(values))
+            total = self.__getRowSum(values)  # Calculate sum of values
+            row.append(total)
         else:
             row.append('')  # Empty total for XIRR
         return row
@@ -87,5 +88,6 @@ class TableGenerator:
 
         return rows
 
-    def __getRowSum(self, row: []):
-        return str(sum(map(lambda v: decimal.Decimal(v), row[1:])))
+    def __getRowSum(self, values: [str]):
+        """Calculate the sum of a list of string values."""
+        return str(sum(map(lambda v: decimal.Decimal(v), values)))
