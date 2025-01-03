@@ -4,6 +4,7 @@ from rich.console import Console
 from rich.table import Table
 from lib.Config import Config
 from models import Period, Platform
+from models.Portfolio import Portfolio
 
 
 class TableGenerator:
@@ -16,7 +17,8 @@ class TableGenerator:
     def print(self):
         self.console.print(self.table)
 
-    def setRows(self, periods: [Period], platforms: [Platform]):
+    def setRows(self, periods: [Period], portfolio: Portfolio):
+        platforms = portfolio.getPlatforms()  # Get the list of platforms from the Portfolio object
         rows = self.__initRows(periods, platforms)
         for i, row in enumerate(rows[::-1]):
             if i > 12:
@@ -30,7 +32,7 @@ class TableGenerator:
         self.table.add_row(*self.__createValueRow(platforms))
         self.table.add_row('')
         self.table.add_row(*self.__createXirrRow(platforms))
-        self.table.add_row(*self.__createUnrealisedGainLossRow(platforms))
+        self.table.add_row(*self.__createUnrealisedGainLossRow(portfolio))  # Pass portfolio instead of platforms
 
     def __createValueRow(self, platforms: [Platform]):
         row = ['Value']
@@ -58,11 +60,14 @@ class TableGenerator:
 
         return row
 
-    def __createUnrealisedGainLossRow(self, platforms: [Platform]):
+    def __createUnrealisedGainLossRow(self, portfolio: Portfolio):
         row = ['Unrealised Gain/Loss (%)']
 
-        for p in platforms:
+        # Calculate unrealised gain/loss for each platform and add to row
+        for p in portfolio.getPlatforms():
             row.append(str(p.unrealisedGainLoss()))
+
+        row.append(str(portfolio.calculateTotalUnrealizedGainLoss()))  # Add total portfolio unrealized gain/loss
 
         return row
 
