@@ -3,8 +3,9 @@ import os
 
 
 class Config:
-    def __init__(self, portfolio):
-        self.portfolio = portfolio
+    def __init__(self, args):
+        self.portfolio = args.portfolio
+        self.summary = args.summary
         config_path = os.path.join(self.getPortfolioDir(), 'config.yaml')
 
         with open(config_path, 'r') as file:
