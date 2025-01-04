@@ -82,12 +82,13 @@ class TableGenerator:
         rows = []
         for period in periods:
             row = []
-            row.append(period.start.strftime('%B %Y'))
             for platform in platforms:
                 period.fill(platform.valuations, platform.transactions)
                 row.append(str(period.calculateReturn()))
 
             row.append(self.__getRowSum(row))
+            row.insert(0, period.start.strftime('%B %Y'))
+
             rows.append(row)
 
         return rows

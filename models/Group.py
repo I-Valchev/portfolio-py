@@ -1,4 +1,5 @@
 import pyxirr
+import decimal
 from datetime import date
 from models.Transaction import Transaction
 
@@ -10,7 +11,8 @@ class Group:
 
     def calculateBalance(self):
         """Sum of all transaction values (net inflow)."""
-        return sum(t.value for t in self.transactions)
+        return decimal.Decimal(sum(t.value for t in self.transactions)).quantize(decimal.Decimal("0.00"))
+
 
     def calculateXirr(self):
         """Computes XIRR based on transactions and valuations."""
@@ -39,7 +41,7 @@ class Group:
         Total return = (Final Valuation - Initial Valuation) - Net Investments.
         """
         if not self.valuations:
-            return 0
+            return decimal.Decimal("0.00")
 
         initial_valuation = self.valuations[0]
         final_valuation = self.valuations[-1]
@@ -55,13 +57,13 @@ class Group:
             Unrealized Gain/Loss % = (Latest Valuation - Net Investments) / Net Investments * 100
         """
         if not self.valuations:
-            return 0
+            return decimal.Decimal("0.00")
 
         latest = self.valuations[-1]
         net_investments = self._netInvestments(self.valuations[0].date, latest.date)
 
         if net_investments == 0:
-            return 0  # Avoid division by zero
+            return decimal.Decimal("0.00")  # Avoid division by zero
 
         unrealized_percentage = ((latest.value - net_investments) / net_investments) * 100
         return round(unrealized_percentage, 2)
