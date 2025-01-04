@@ -11,7 +11,11 @@ class TableGenerator:
         self.config = config
         self.console = Console()
         self.headings = ['Period'] + self.config.getPrettyPlatforms() + ['Total']
-        self.table = Table(*self.headings)
+        
+        self.table = Table()
+        self.table.add_column("Period", justify="left")
+        [self.table.add_column(platform, justify="right") for platform in self.config.getPrettyPlatforms()]
+        self.table.add_column("Total", justify="right")
 
     def print(self):
         self.console.print(self.table)
