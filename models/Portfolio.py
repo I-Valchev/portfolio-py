@@ -21,3 +21,7 @@ class Portfolio:
             unrealized_gain_loss = 0.0  # Avoid division by zero if there are no investments
 
         return round(unrealized_gain_loss, 2)
+
+    def calculatePortfolioValue(self):
+        """Calculates the total value of the portfolio."""
+        return round(sum(p.calculateBalance() + p.calculateReturn() for p in self.platforms), 2)

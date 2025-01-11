@@ -32,6 +32,7 @@ class TableGenerator:
         self.table.add_row(*self.__createInvestedRow(platforms))
         self.table.add_row(*self.__createValueRow(platforms))
         self.table.add_row('')
+        self.table.add_row(*self.__createPortfolioShareRow(platforms, portfolio))
         self.table.add_row(*self.__createXirrRow(platforms))
         self.table.add_row(*self.__createUnrealisedGainLossRow(portfolio))  # Pass portfolio instead of platforms
 
@@ -77,6 +78,11 @@ class TableGenerator:
     def __createTotalsRow(self, platforms: [Platform]):
         """Creates the Earned row for the table."""
         return self.__createRow('Earned', platforms, lambda p: p.calculateReturn(), add_total=True)
+
+    def __createPortfolioShareRow(self, platforms: [Platform], portfolio: Portfolio):
+        """Creates the Portfolio Share row for the table."""
+        total_value = portfolio.calculatePortfolioValue()
+        return self.__createRow('% of portfolio', platforms, lambda p: p.calculatePortfolioShare(total_value), add_total=False)
 
     def __initRows(self, periods: [Period], platforms: [Platform]):
         rows = []

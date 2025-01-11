@@ -67,6 +67,13 @@ class Group:
 
         unrealized_percentage = ((latest.value - net_investments) / net_investments) * 100
         return round(unrealized_percentage, 2)
+    
+    def calculatePortfolioShare(self, total_value):
+        """Calculates the share of the portfolio's value."""
+        if total_value == 0:
+            return decimal.Decimal("0.00")
+
+        return round((self.calculateBalance() + self.calculateReturn()) * 100 / total_value, 2)
 
     def _qualifyTransactions(self, transactions: [Transaction]):
         """Filters transactions that occurred before the latest valuation."""
