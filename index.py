@@ -1,10 +1,9 @@
 #!/usr/bin/python3
 
-import datetime
 import argparse
-
-from lib.Config import Config
 from lib.TableGenerator import TableGenerator
+from lib.BarGenerator import BarGenerator
+from lib.Config import Config
 from models.Portfolio import Portfolio
 
 # Parse command-line arguments
@@ -21,7 +20,7 @@ for portfolio_name in args.portfolios:
 
     portfolio = Portfolio(config)
 
-    generator = TableGenerator(config, portfolio)
-    generator.run()
-
-    # generator.print()
+    tableGenerator = TableGenerator(config, portfolio)
+    barGenerator = BarGenerator(config, portfolio)
+    tableGenerator.run()
+    barGenerator.run()
