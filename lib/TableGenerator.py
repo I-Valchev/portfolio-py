@@ -16,7 +16,7 @@ class TableGenerator:
         self.periods = generateAllPeriods(datetime.date(2020, 1, 1), datetime.date.today())
         self.headings = ['Period'] + self.config.getPrettyPlatforms() + ['Total']
         
-        self.table = Table()
+        self.table = Table(expand=True)
         self.table.add_column("Period", justify="left")
         [self.table.add_column(platform, justify="right") for platform in self.config.getPrettyPlatforms()]
         self.table.add_column("Total", justify="right")
@@ -103,13 +103,13 @@ class TableGenerator:
         total_value = sum(p.calculateBalance() + p.calculateReturn() for p in self.portfolio.platforms)
         shares = [self.calculatePercentageOfTotal(p.calculateBalance() + p.calculateReturn(), total_value) for p in self.portfolio.platforms]
 
-        bar_length = 50  # Length of the bar
+        bar_length = self.console.width
         bar = ""
         for platform, share in zip(self.portfolio.platforms, shares):
             color = self.__getColor(platform)
             style = Style(bgcolor=color)
             bar += f"[{style}]{' ' * int(bar_length * (share / 100))}[/]"
-        return Panel(bar, title="Portfolio Share", expand=False)
+        return Panel(bar, title="Portfolio Share")
 
     def __getColor(self, platform):
         """Returns the color for a given platform."""
