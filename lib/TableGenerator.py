@@ -27,11 +27,10 @@ class TableGenerator:
             self.__createDetailRows(periods, platforms)
 
         # Add the summary rows
-        self.table.add_row('')
         self.table.add_row(*self.__createTotalsRow(platforms))
         self.table.add_row(*self.__createInvestedRow(platforms))
         self.table.add_row(*self.__createValueRow(platforms))
-        self.table.add_row('')
+        self.table.add_section()
         self.table.add_row(*self.__createPortfolioShareRow(platforms, portfolio))
         self.table.add_row(*self.__createXirrRow(platforms))
         self.table.add_row(*self.__createUnrealisedGainLossRow(portfolio))  # Pass portfolio instead of platforms
