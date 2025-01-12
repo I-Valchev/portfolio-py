@@ -25,6 +25,7 @@ class TableGenerator:
 
         if not self.config.summary:
             self.__createDetailRows(periods, platforms)
+            self.table.add_section()
 
         # Add the summary rows
         self.table.add_row(*self.__createTotalsRow(platforms))
