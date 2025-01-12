@@ -10,6 +10,7 @@ class Platform(Group):
     def __init__(self, name, config):
         super().__init__()
         self.name = name
+        self.prettyName = config.config['platforms'][name]['pretty']
 
         # Use config to get the portfolio directory
         portfolio_dir = config.getPortfolioDir()
@@ -38,3 +39,6 @@ class Platform(Group):
 
         initial = Valuation(earliest.date + relativedelta(days=-1), 0)
         self.valuations.insert(0, initial)
+
+    def __str__(self):
+        return self.prettyName

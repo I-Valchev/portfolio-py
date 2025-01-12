@@ -4,6 +4,7 @@ from rich.console import Console
 from rich.table import Table
 from rich.style import Style
 from rich.panel import Panel
+from rich.text import Text
 from lib.Config import Config
 from lib.helpers import generateAllPeriods
 from models.Portfolio import Portfolio
@@ -18,7 +19,11 @@ class TableGenerator:
         
         self.table = Table(expand=True)
         self.table.add_column("Period", justify="left")
-        [self.table.add_column(platform, justify="right") for platform in self.config.getPrettyPlatforms()]
+
+        [self.table.add_column(
+            Text(f"▉ {platform}", Style(color=self.__getColor(platform))), 
+            justify="right"
+        ) for platform in self.portfolio.platforms]
         self.table.add_column("Total", justify="right")
 
     def run(self):
