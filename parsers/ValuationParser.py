@@ -1,3 +1,4 @@
+from lib import Config
 from models import Valuation
 
 
@@ -5,10 +6,11 @@ class ValuationParser:
     def __init__(self, file):
         self.file = file
 
-    def parse(self):
+    def parse(self, config: Config):
         lines = tuple(open(self.file, 'r'))
-        return list(map(self.__lineToValution, lines))
+        currencyAdjustment = config.getCurrencyAdjustment()
+        return [self.__lineToValution(line, currencyAdjustment) for line in lines]
 
-    def __lineToValution(self, line):
+    def __lineToValution(self, line, currencyAdjustment):
         date, value = line.split(" ")
-        return Valuation.Valuation(date, value)
+        return Valuation.Valuation(date, value, currencyAdjustment)

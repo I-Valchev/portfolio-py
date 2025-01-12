@@ -6,6 +6,7 @@ class Config:
     def __init__(self, args):
         self.portfolio = args.portfolio
         self.summary = args.summary
+        self.currency = args.currency
         config_path = os.path.join(self.getPortfolioDir(), 'config.yaml')
 
         with open(config_path, 'r') as file:
@@ -23,3 +24,16 @@ class Config:
 
     def getPortfolio(self):
         return self.portfolio
+
+    def getCurrencyAdjustment(self):
+        """Returns the currency adjustment factor based on the currency."""
+        eurToBgn = 1.95583
+
+        if self.currency == 'BGN' and self.__getPortfolioCurrency() == 'EUR':
+            return eurToBgn
+        elif self.currency == 'EUR' and self.__getPortfolioCurrency() == 'BGN':
+            return 1/eurToBgn
+        return 1.0
+    
+    def __getPortfolioCurrency(self):
+        return self.config.get('currency', 'EUR')

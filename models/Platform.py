@@ -19,8 +19,8 @@ class Platform(Group):
         transactionsFilename = os.path.join(portfolio_dir, f"{self.name}-transactions.txt")
         
         # Parse the valuations and transactions using the new paths
-        self.valuations = ValuationParser(valuationsFilename).parse()
-        self.transactions = self._qualifyTransactions(TransactionParser(transactionsFilename).parse())
+        self.valuations = ValuationParser(valuationsFilename).parse(config)
+        self.transactions = self._qualifyTransactions(TransactionParser(transactionsFilename).parse(config))
 
         self.__fillInitialValuation(self.transactions)
 
