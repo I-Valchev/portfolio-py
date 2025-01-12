@@ -5,7 +5,6 @@ import argparse
 
 from lib.Config import Config
 from lib.TableGenerator import TableGenerator
-from lib.helpers import generateAllPeriods
 from models.Portfolio import Portfolio
 
 # Parse command-line arguments
@@ -21,9 +20,8 @@ for portfolio_name in args.portfolios:
     config = Config(argparse.Namespace(portfolio=portfolio_name, summary=args.summary, currency=args.currency))
 
     portfolio = Portfolio(config)
-    periods = generateAllPeriods(datetime.date(2020, 1, 1), datetime.date.today())
 
-    generator = TableGenerator(config)
-    generator.setRows(periods, portfolio)
+    generator = TableGenerator(config, portfolio)
+    generator.run()
 
-    generator.print()
+    # generator.print()

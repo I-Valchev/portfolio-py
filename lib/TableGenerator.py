@@ -1,15 +1,19 @@
+import datetime
 import decimal
 from rich.console import Console
 from rich.table import Table
+from rich.style import Style
+from rich.panel import Panel
 from lib.Config import Config
-from models import Period, Platform
+from lib.helpers import generateAllPeriods
 from models.Portfolio import Portfolio
 
-
 class TableGenerator:
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, portfolio: Portfolio):
         self.config = config
         self.console = Console()
+        self.portfolio = portfolio
+        self.periods = generateAllPeriods(datetime.date(2020, 1, 1), datetime.date.today())
         self.headings = ['Period'] + self.config.getPrettyPlatforms() + ['Total']
         
         self.table = Table()
@@ -17,37 +21,37 @@ class TableGenerator:
         [self.table.add_column(platform, justify="right") for platform in self.config.getPrettyPlatforms()]
         self.table.add_column("Total", justify="right")
 
-    def print(self):
-        self.console.print(self.table)
-
-    def setRows(self, periods: [Period], portfolio: Portfolio):
-        platforms = portfolio.platforms  # Get the list of platforms from the Portfolio object
+    def run(self):
+        self.portfolio.platforms  # Get the list of platforms from the Portfolio object
 
         if not self.config.summary:
-            self.__createDetailRows(periods, platforms)
+            self.__createDetailRows()
             self.table.add_section()
 
         # Add the summary rows
-        self.table.add_row(*self.__createTotalsRow(platforms))
-        self.table.add_row(*self.__createInvestedRow(platforms))
-        self.table.add_row(*self.__createValueRow(platforms))
+        self.table.add_row(*self.__createTotalsRow())
+        self.table.add_row(*self.__createInvestedRow())
+        self.table.add_row(*self.__createValueRow())
         self.table.add_section()
-        self.table.add_row(*self.__createPortfolioShareRow(platforms, portfolio))
-        self.table.add_row(*self.__createXirrRow(platforms))
-        self.table.add_row(*self.__createUnrealisedGainLossRow(portfolio))  # Pass portfolio instead of platforms
+        self.table.add_row(*self.__createPortfolioShareRow())
+        self.table.add_row(*self.__createXirrRow())
+        self.table.add_row(*self.__createUnrealisedGainLossRow())
 
-    def __createDetailRows(self, periods, platforms):
-        rows = self.__initRows(periods, platforms)
+        self.console.print(self.table)
+        self.console.print(self.__createShareBar())  # Print the share bar underneath the table
+
+    def __createDetailRows(self):
+        rows = self.__initRows()
         for i, row in enumerate(rows[::-1]):
             if i > 12:
                 break
 
             self.table.add_row(*row)
 
-    def __createRow(self, label: str, platforms: [Platform], calc_func, add_total=False):
+    def __createRow(self, label: str, calc_func, add_total=False):
         """Helper method to create a row for various calculations."""
         row = [label]
-        values = [str(calc_func(p)) for p in platforms]
+        values = [str(calc_func(p)) for p in self.portfolio.platforms]
         row.extend(values)
         if add_total:
             total = self.__getRowSum(values)  # Calculate sum of values
@@ -56,39 +60,66 @@ class TableGenerator:
             row.append('')  # Empty total for XIRR
         return row
 
-    def __createValueRow(self, platforms: [Platform]):
+    def __createValueRow(self):
         """Creates the Value row for the table."""
-        return self.__createRow('Value', platforms, lambda p: p.calculateBalance() + p.calculateReturn(), add_total=True)
+        return self.__createRow('Value', lambda p: p.calculateBalance() + p.calculateReturn(), add_total=True)
 
-    def __createInvestedRow(self, platforms: [Platform]):
+    def __createInvestedRow(self):
         """Creates the Invested row for the table."""
-        return self.__createRow('Invested', platforms, lambda p: p.calculateBalance(), add_total=True)
+        return self.__createRow('Invested', lambda p: p.calculateBalance(), add_total=True)
 
-    def __createXirrRow(self, platforms: [Platform]):
+    def __createXirrRow(self):
         """Creates the xirr row for the table."""
-        return self.__createRow('xirr (%)', platforms, lambda p: p.calculateXirr(), add_total=False)
+        return self.__createRow('xirr (%)', lambda p: p.calculateXirr(), add_total=False)
 
-    def __createUnrealisedGainLossRow(self, portfolio: Portfolio):
+    def __createUnrealisedGainLossRow(self):
         """Creates the Unrealised Gain/Loss row for the table."""
         row = ['Unrealised Gain/Loss (%)']
-        row.extend(str(p.unrealisedGainLoss()) for p in portfolio.platforms)
-        row.append(str(portfolio.calculateTotalUnrealizedGainLoss()))
+        row.extend(str(p.unrealisedGainLoss()) for p in self.portfolio.platforms)
+        row.append(str(self.portfolio.calculateTotalUnrealizedGainLoss()))
         return row
 
-    def __createTotalsRow(self, platforms: [Platform]):
+    def __createTotalsRow(self):
         """Creates the Earned row for the table."""
-        return self.__createRow('Earned', platforms, lambda p: p.calculateReturn(), add_total=True)
+        return self.__createRow('Earned', lambda p: p.calculateReturn(), add_total=True)
 
-    def __createPortfolioShareRow(self, platforms: [Platform], portfolio: Portfolio):
+    def __createPortfolioShareRow(self):
         """Creates the Portfolio Share row for the table."""
-        total_value = portfolio.calculatePortfolioValue()
-        return self.__createRow('% of portfolio', platforms, lambda p: p.calculatePortfolioShare(total_value), add_total=False)
+        total_value = sum(p.calculateBalance() + p.calculateReturn() for p in self.portfolio.platforms)
+        row = ['Portfolio Share (%)']
+        shares = [self.calculatePercentageOfTotal(p.calculateBalance() + p.calculateReturn(), total_value) for p in self.portfolio.platforms]
+        row.extend(str(share) for share in shares)
+        row.append('100.00')  # Total percentage is always 100%
+        return row
 
-    def __initRows(self, periods: [Period], platforms: [Platform]):
+    def calculatePercentageOfTotal(self, value, total):
+        """Calculates the value as a percentage of the total."""
+        if total == 0:
+            return decimal.Decimal("0.00")  # Avoid division by zero
+        return (decimal.Decimal(value) / decimal.Decimal(total) * 100).quantize(decimal.Decimal("0.00"))
+
+    def __createShareBar(self):
+        """Creates a bar chart showing the share of each platform."""
+        total_value = sum(p.calculateBalance() + p.calculateReturn() for p in self.portfolio.platforms)
+        shares = [self.calculatePercentageOfTotal(p.calculateBalance() + p.calculateReturn(), total_value) for p in self.portfolio.platforms]
+
+        bar_length = 50  # Length of the bar
+        bar = ""
+        for platform, share in zip(self.portfolio.platforms, shares):
+            color = self.__getColor(platform)
+            style = Style(bgcolor=color)
+            bar += f"[{style}]{' ' * int(bar_length * (share / 100))}[/]"
+        return Panel(bar, title="Portfolio Share", expand=False)
+
+    def __getColor(self, platform):
+        """Returns the color for a given platform."""
+        return self.config.config['platforms'][platform.name]['color']
+
+    def __initRows(self):
         rows = []
-        for period in periods:
+        for period in self.periods:
             row = []
-            for platform in platforms:
+            for platform in self.portfolio.platforms:
                 period.fill(platform.valuations, platform.transactions)
                 row.append(str(period.calculateReturn()))
 
