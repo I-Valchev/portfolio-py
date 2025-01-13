@@ -82,7 +82,6 @@ class TableGenerator(Generator):
         row = ['Portfolio Share (%)']
         shares = [self.calculatePercentageOfTotal(p.calculateBalance() + p.calculateReturn(), total_value) for p in self.portfolio.platforms]
         row.extend(str(share) for share in shares)
-        row.append('100.00')  # Total percentage is always 100%
         return row
 
     def __initRows(self):
