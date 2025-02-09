@@ -5,7 +5,7 @@ import os
 class Config:
     def __init__(self, args):
         self.portfolio = args.portfolio
-        self.summary = args.summary
+        self.summary = getattr(args, 'summary', None)
         self.currency = args.currency
         config_path = os.path.join(self.getPortfolioDir(), 'config.yaml')
 

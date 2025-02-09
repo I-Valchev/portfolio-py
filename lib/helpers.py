@@ -1,3 +1,4 @@
+import os
 from dateutil.relativedelta import relativedelta
 
 from lib import Config
@@ -21,3 +22,7 @@ def generatePlatforms(config: Config):
     names = config.getPlatforms()
     return list(map(lambda name: Platform(name, config), names))
 
+
+def availablePortfolios():
+    portfoliosFolder = os.path.join('data')
+    return [name for name in os.listdir(portfoliosFolder) if os.path.isdir(os.path.join(portfoliosFolder, name))]

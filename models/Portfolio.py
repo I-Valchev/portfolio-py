@@ -25,3 +25,7 @@ class Portfolio:
     def calculatePortfolioValue(self):
         """Calculates the total value of the portfolio."""
         return round(sum(p.calculateBalance() + p.calculateReturn() for p in self.platforms), 2)
+    
+    def calculatePortfolioBalance(self):
+        """Calculates the total balance of the portfolio."""
+        return round(sum(p.calculateBalance() for p in self.platforms), 2)
