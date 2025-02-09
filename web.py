@@ -37,19 +37,8 @@ data = pd.DataFrame({
 
 st.bar_chart(data, x='Platform', y='Value')
 
-# # Create the Pie Chart with Plotly using the 'Color' column
-# fig = px.pie(data, values="Value", names="Platform")
-# fig.update_traces(marker=dict(colors=platform_colors))
-# st.plotly_chart(fig)
 
-# tableGenerator = TableGenerator(config, portfolio)
-# tableGenerator.run()
+tableGenerator = TableGenerator(config, portfolio)
+table = tableGenerator.toArray()
 
-# print(tableGenerator)
-# st.write(tableGenerator.table.columns)
-# # st.write(tableGenerator.table.columns[0].cells)
-
-# table = []
-
-# for column in tableGenerator.table.columns:
-#     table.append([cell for cell in column.cells])
+st.table(table)

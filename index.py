@@ -22,5 +22,5 @@ for portfolio_name in args.portfolios:
 
     tableGenerator = TableGenerator(config, portfolio)
     barGenerator = BarGenerator(config, portfolio)
-    tableGenerator.run()
+    tableGenerator.toRichTable()
     barGenerator.run()

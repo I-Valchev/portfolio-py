@@ -1,5 +1,7 @@
+import pandas as pd
 from lib.Generator import Generator
 import decimal
+from rich.console import Console
 from rich.table import Table
 from rich.style import Style
 from rich.text import Text
@@ -11,41 +13,67 @@ class TableGenerator(Generator):
     """Generates the portfolio table."""
     def __init__(self, config: Config, portfolio: Portfolio):
         super().__init__(config, portfolio)
-        self.headings = ['Period'] + self.config.getPrettyPlatforms() + ['Total']
-        self.table = Table(expand=True)
-        self.table.add_column("Period", justify="left")
+        self.config = config
+        self.portfolio = portfolio
+        self.data = []
+
+        self.__run()
+
+    def __run(self):
+        """Generates the table data."""
+        if not self.config.summary:
+            self.__createDetailRows()
+            self.data.append([])  # Add section
+
+        # Add summary rows
+        self.data.append(self.__createTotalsRow())
+        self.data.append(self.__createInvestedRow())
+        self.data.append(self.__createValueRow())
+        self.data.append([])
+        self.data.append(self.__createPortfolioShareRow())
+        self.data.append(self.__createXirrRow())
+        self.data.append(self.__createUnrealisedGainLossRow())
+
+        return self.data
+
+    def toArray(self):
+        """Returns the table data as a pandas DataFrame."""
+        headings = ["Period"] + [str(platform) for platform in self.portfolio.platforms] + ["Total"]
+        array_data = [headings]
+        for row in self.data:
+            if row:
+                array_data.append(row)
+            else:
+                array_data.append([""] * len(headings))  # Add empty row for section
+        return pd.DataFrame(array_data[1:], columns=array_data[0])
+
+    def toRichTable(self):
+        """Generates and returns the rich table."""
+        table = Table(expand=True)
+        table.add_column("Period", justify="left")
 
         for platform in self.portfolio.platforms:
-            self.table.add_column(
+            table.add_column(
                 Text(f"▉ {platform}", Style(color=self._getColor(platform))),
                 justify="right"
             )
 
-        self.table.add_column("Total", justify="right")
+        table.add_column("Total", justify="right")
 
-    def run(self):
-        """Generates and prints the table."""
-        if not self.config.summary:
-            self.__createDetailRows()
-            self.table.add_section()
+        for row in self.data:
+            if row:
+                table.add_row(*row)
+            else:
+                table.add_section()
 
-        # Add summary rows
-        self.table.add_row(*self.__createTotalsRow())
-        self.table.add_row(*self.__createInvestedRow())
-        self.table.add_row(*self.__createValueRow())
-        self.table.add_section()
-        self.table.add_row(*self.__createPortfolioShareRow())
-        self.table.add_row(*self.__createXirrRow())
-        self.table.add_row(*self.__createUnrealisedGainLossRow())
-
-        self.console.print(self.table)
+        self.console.print(table)
 
     def __createDetailRows(self):
         rows = self.__initRows()
         for i, row in enumerate(rows[::-1]):
             if i > 12:
                 break
-            self.table.add_row(*row)
+            self.data.append(row)
 
     def __createRow(self, label: str, calc_func, add_total=False):
         """Helper method to create a row for various calculations."""
@@ -100,20 +128,3 @@ class TableGenerator(Generator):
 
     def __getRowSum(self, values: [str]):
         return str(sum(map(lambda v: decimal.Decimal(v), values)))
-
-
-
-# # Example Usage
-# def main():
-#     config = Config()  # Assuming Config is properly initialized
-#     portfolio = Portfolio()  # Assuming Portfolio is properly initialized
-
-#     table_generator = TableGenerator(config, portfolio)
-#     bar_generator = BarGenerator(config, portfolio)
-
-#     table_generator.run()  # Print the table
-#     bar_generator.run()  # Print the bar chart
-
-
-# if __name__ == "__main__":
-#     main()
