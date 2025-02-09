@@ -8,28 +8,45 @@ from lib.helpers import generateAllPeriods
 from models.Portfolio import Portfolio
 import pandas as pd
 import plotly.express as px
-from weblib import sections
+from weblib import newcomer, sections
+from streamlit_gsheets import GSheetsConnection
+from weblib.Database import Database
 
 st.write('# Portfolio Tracker')
+
+database = Database()
 
 # INPUTS
 [portfolio, currency] = sections.inputs()
 st.divider()
 
-config = Config(argparse.Namespace(portfolio=portfolio, currency=currency))
-portfolio = Portfolio(config)
+if portfolio == None:
+    newcomer.newcomper(st)
+    
+    portfolios = database.readPortfolios()
+    st.text(portfolios['portfolio'].iloc[0])
+    platforms = database.readPlatforms(portfolios['portfolio'].iloc[0])
+    transactions = database.readTransactions(portfolios['portfolio'].iloc[0], platforms['platform'].iloc[0])
 
-sections.key_metrics(portfolio, config, st)
-sections.portfolio_bar(portfolio)
+    st.write(portfolios)
+    st.write(platforms)
+    st.write(transactions)
 
-tabs = st.tabs([str(platform) for platform in portfolio.platforms])
+else:
+    config = Config(argparse.Namespace(portfolio=portfolio, currency=currency))
+    portfolio = Portfolio(config)
 
-periods = generateAllPeriods(datetime.date(2024, 1, 1), datetime.date.today())
+    sections.key_metrics(portfolio, config, st)
+    sections.portfolio_bar(portfolio)
 
-for platform, tab in zip(portfolio.platforms, tabs):
-    sections.key_metrics(platform, config, tab)
-    sections.platform_metrics(platform, portfolio, tab)
-    sections.platform_returns(platform, periods, tab)
+    tabs = st.tabs([str(platform) for platform in portfolio.platforms])
+
+    periods = generateAllPeriods(datetime.date(2024, 1, 1), datetime.date.today())
+
+    for platform, tab in zip(portfolio.platforms, tabs):
+        sections.key_metrics(platform, config, tab)
+        sections.platform_metrics(platform, portfolio, tab)
+        sections.platform_returns(platform, periods, tab)
 
 
 

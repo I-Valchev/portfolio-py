@@ -24,5 +24,8 @@ def generatePlatforms(config: Config):
 
 
 def availablePortfolios():
-    portfoliosFolder = os.path.join('data')
-    return [name for name in os.listdir(portfoliosFolder) if os.path.isdir(os.path.join(portfoliosFolder, name))]
+    try:
+        portfoliosFolder = os.path.join('data-no')
+        return [name for name in os.listdir(portfoliosFolder) if os.path.isdir(os.path.join(portfoliosFolder, name))]
+    except FileNotFoundError:
+        return []
