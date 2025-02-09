@@ -17,19 +17,19 @@ class TableGenerator(Generator):
         self.portfolio = portfolio
         self.data = []
 
-        self.__run()
-
-    def __run(self):
+    def __run(self, noempty=False):
         """Generates the table data."""
         if not self.config.summary:
             self.__createDetailRows()
-            self.data.append([])  # Add section
+            if not noempty:
+                self.data.append([])  # Add section
 
         # Add summary rows
         self.data.append(self.__createTotalsRow())
         self.data.append(self.__createInvestedRow())
         self.data.append(self.__createValueRow())
-        self.data.append([])
+        if(not noempty):
+            self.data.append([])
         self.data.append(self.__createPortfolioShareRow())
         self.data.append(self.__createXirrRow())
         self.data.append(self.__createUnrealisedGainLossRow())
@@ -37,6 +37,8 @@ class TableGenerator(Generator):
         return self.data
 
     def toArray(self):
+        self.__run(noempty=True)
+
         """Returns the table data as a pandas DataFrame."""
         headings = ["Period"] + [str(platform) for platform in self.portfolio.platforms] + ["Total"]
         array_data = [headings]
@@ -48,6 +50,8 @@ class TableGenerator(Generator):
         return pd.DataFrame(array_data[1:], columns=array_data[0])
 
     def toRichTable(self):
+        self.__run()
+
         """Generates and returns the rich table."""
         table = Table(expand=True)
         table.add_column("Period", justify="left")
@@ -99,7 +103,7 @@ class TableGenerator(Generator):
     def __createUnrealisedGainLossRow(self):
         row = ['Unrealised Gain/Loss (%)']
         row.extend(str(p.unrealisedGainLoss()) for p in self.portfolio.platforms)
-        row.append(str(self.portfolio.calculateTotalUnrealizedGainLoss()))
+        row.append(str(self.portfolio.unrealisedGainLoss()))
         return row
 
     def __createTotalsRow(self):

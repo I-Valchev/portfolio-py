@@ -7,7 +7,7 @@ class Portfolio:
     def __init__(self, config: Config):
         self.platforms = generatePlatforms(config)
 
-    def calculateTotalUnrealizedGainLoss(self):
+    def unrealisedGainLoss(self):
         """
         Calculates the unrealized gain/loss percentage for the entire portfolio,
         based on all platforms combined.
@@ -22,10 +22,10 @@ class Portfolio:
 
         return round(unrealized_gain_loss, 2)
 
-    def calculatePortfolioValue(self):
+    def calculateCurrentValue(self):
         """Calculates the total value of the portfolio."""
         return round(sum(p.calculateBalance() + p.calculateReturn() for p in self.platforms), 2)
     
-    def calculatePortfolioBalance(self):
+    def calculateBalance(self):
         """Calculates the total balance of the portfolio."""
         return round(sum(p.calculateBalance() for p in self.platforms), 2)
