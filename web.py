@@ -7,7 +7,6 @@ from lib.TableGenerator import TableGenerator
 from lib.helpers import generateAllPeriods
 from models.Portfolio import Portfolio
 import pandas as pd
-import plotly.express as px
 from weblib import newcomer, sections
 from streamlit_gsheets import GSheetsConnection
 from weblib.Database import Database
