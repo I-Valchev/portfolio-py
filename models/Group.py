@@ -11,7 +11,8 @@ class Group:
 
     def calculateBalance(self):
         """Sum of all transaction values (net inflow)."""
-        return decimal.Decimal(sum(t.value for t in self.transactions)).quantize(decimal.Decimal("0.00"))
+        # return decimal.Decimal(sum(t.value for t in self.transactions)).quantize(decimal.Decimal("0.00"))
+        return sum(t.value for t in self.transactions)
     
     def calculateCurrentValue(self):
         return self.calculateBalance() + self.calculateReturn()

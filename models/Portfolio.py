@@ -1,12 +1,4 @@
-from models.Platform import Platform
-from lib.Config import Config
-from lib.helpers import generatePlatforms
-
-
 class Portfolio:
-    def __init__(self, config: Config):
-        self.platforms = generatePlatforms(config)
-
     def unrealisedGainLoss(self):
         """
         Calculates the unrealized gain/loss percentage for the entire portfolio,

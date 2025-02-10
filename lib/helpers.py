@@ -2,6 +2,7 @@ import os
 from dateutil.relativedelta import relativedelta
 
 from lib import Config
+from lib.db.Database import Database
 from models.Period import Period
 from models.Platform import Platform
 
@@ -24,8 +25,4 @@ def generatePlatforms(config: Config):
 
 
 def availablePortfolios():
-    try:
-        portfoliosFolder = os.path.join('data-no')
-        return [name for name in os.listdir(portfoliosFolder) if os.path.isdir(os.path.join(portfoliosFolder, name))]
-    except FileNotFoundError:
-        return []
+    return Database().fetchAllPortfolioNames()

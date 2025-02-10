@@ -1,28 +1,11 @@
 from models.Group import Group
 from models.Transaction import Transaction
 from models.Valuation import Valuation
-from parsers.TransactionParser import TransactionParser
-from parsers.ValuationParser import ValuationParser
 from dateutil.relativedelta import relativedelta
-import os
+
 
 class Platform(Group):
-    def __init__(self, name, config):
-        super().__init__()
-        self.name = name
-        self.prettyName = config.config['platforms'][name]['pretty']
-
-        # Use config to get the portfolio directory
-        portfolio_dir = config.getPortfolioDir()
-
-        # Construct the paths for valuations and transactions based on portfolio directory
-        valuationsFilename = os.path.join(portfolio_dir, f"{self.name}-valuations.txt")
-        transactionsFilename = os.path.join(portfolio_dir, f"{self.name}-transactions.txt")
-        
-        # Parse the valuations and transactions using the new paths
-        self.valuations = ValuationParser(valuationsFilename).parse(config)
-        self.transactions = self._qualifyTransactions(TransactionParser(transactionsFilename).parse(config))
-
+    def __init__(self):
         self.__fillInitialValuation(self.transactions)
 
     def __fillInitialValuation(self, transactions: [Transaction]):
@@ -40,5 +23,6 @@ class Platform(Group):
         initial = Valuation(earliest.date + relativedelta(days=-1), 0)
         self.valuations.insert(0, initial)
 
+    # TODO: maybe this shouldn't be here
     def __str__(self):
-        return self.prettyName
+        return self.pretty

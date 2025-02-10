@@ -4,6 +4,7 @@ import streamlit as st
 
 from lib.Config import Config
 from lib.helpers import availablePortfolios
+from models.Period import Period
 from models.Platform import Platform
 from models.Portfolio import Portfolio
 
@@ -17,12 +18,11 @@ def inputs():
 
     return [portfolio, currency]
 
-def key_metrics(portfolio: Portfolio | Platform, config: Config, target: st):
+def key_metrics(portfolio: Portfolio | Platform, currency: str, target: st):
     col1, col2 = target.columns(2)
 
     delta = portfolio.calculateCurrentValue() - portfolio.calculateBalance()
-    col1.metric(label='Portfolio Value', value=f"{portfolio.calculateCurrentValue()} {config.currency}", delta=f"{delta}")
-
+    col1.metric(label='Portfolio Value', value=f"{portfolio.calculateCurrentValue()} {currency}", delta=f"{delta}")
     col2.metric(label='Unrealized Gain/Loss', value=f"{portfolio.unrealisedGainLoss()} %")
 
 def portfolio_bar(portfolio: Portfolio):
@@ -44,8 +44,8 @@ def platform_metrics(plaform: Platform, portfolio: Portfolio, target: st):
 
     col1.metric(label='Portfolio Share', value=f"{plaform.calculatePortfolioShare(portfolio.calculateCurrentValue())} %")
 
-def platform_returns(platform: Platform, periods: [pd.Period], tab: st):
-    df = pd.DataFrame(columns=["Ending Period", "Return"])
+def platform_returns(platform: Platform, periods: [Period], tab: st):
+    df = pd.DataFrame(columns=["Period", "Return"])
 
     start_adding = False
     for period in periods:
@@ -56,12 +56,12 @@ def platform_returns(platform: Platform, periods: [pd.Period], tab: st):
         if return_value != 0.0 or start_adding:
 
             new_row = pd.DataFrame({
-                "Ending Period": [period.start.strftime('%B %Y')],
+                "Period": [period.start.strftime('%B %Y')],
                 "Return": [return_value]
             })
 
             df = pd.concat([df, new_row], ignore_index=True)
             
             start_adding = True
-    tab.write("### Returns")
+    tab.write("Monthly returns")
     tab.table(df)
