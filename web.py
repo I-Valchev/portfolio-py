@@ -1,14 +1,7 @@
 import datetime
-import numpy as np
 import streamlit as st
-import argparse
-from lib.Config import Config
-from lib.TableGenerator import TableGenerator
 from lib.helpers import generateAllPeriods
-from models.Portfolio import Portfolio
-import pandas as pd
 from webcontent import newcomer, sections
-from streamlit_gsheets import GSheetsConnection
 from lib.db.Database import Database
 
 st.write('# Portfolio Tracker')

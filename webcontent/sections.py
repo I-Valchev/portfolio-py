@@ -10,7 +10,6 @@ from models.Portfolio import Portfolio
 
 
 def inputs():
-
     col1, col2 = st.columns(2)
 
     portfolio = col1.selectbox('Portfolio', availablePortfolios())
@@ -21,7 +20,7 @@ def inputs():
 def key_metrics(portfolio: Portfolio | Platform, currency: str, target: st):
     col1, col2 = target.columns(2)
 
-    delta = portfolio.calculateCurrentValue() - portfolio.calculateBalance()
+    delta = "{:.2f}".format(portfolio.calculateCurrentValue() - portfolio.calculateBalance())
     col1.metric(label='Portfolio Value', value=f"{portfolio.calculateCurrentValue()} {currency}", delta=f"{delta}")
     col2.metric(label='Unrealized Gain/Loss', value=f"{portfolio.unrealisedGainLoss()} %")
 
@@ -57,7 +56,7 @@ def platform_returns(platform: Platform, periods: [Period], tab: st):
 
             new_row = pd.DataFrame({
                 "Period": [period.start.strftime('%B %Y')],
-                "Return": [return_value]
+                "Return": ["{:.2f}".format(return_value)]
             })
 
             df = pd.concat([df, new_row], ignore_index=True)
