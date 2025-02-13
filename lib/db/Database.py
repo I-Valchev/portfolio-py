@@ -1,8 +1,7 @@
 import pymongo
-from streamlit_gsheets import GSheetsConnection
 import streamlit as st
 
-from lib.db.Models import parse_portfolio
+from lib.db.Models import DbTransaction, DbValuation, parse_portfolio
 
 
 class Database:
@@ -29,6 +28,33 @@ class Database:
             {"_id": 0, "name": 1}  # Projection to return only 'name' field
         )
         return [portfolio["name"] for portfolio in dbPortfolios]
+    
+    def save_platform_changes(self, portfolio_name: str, platform_name: str, new_valuations: list[DbValuation] = None, new_transactions: list[DbTransaction] = None):
+        """Replace valuations or transactions for a specific platform within a portfolio in MongoDB."""
+        updates = {}
+
+        if new_valuations is not None:
+            updates["platforms.$.valuations"] = new_valuations.to_dict(orient="records")
+
+
+        if new_transactions is not None:
+            updates["platforms.$.transactions"] = new_transactions.to_dict(orient="records")
+
+        if updates:
+            result = self.conn.get_database("all_data").portfolios.update_one(
+                {
+                    "name": portfolio_name,
+                    "platforms.name": platform_name  # Match the correct platform within the portfolio
+                },
+                {
+                    "$set": updates  # Replace valuations and/or transactions
+                }
+            )
+            if result.modified_count > 0:
+                st.success(f"Successfully updated {platform_name} in {portfolio_name}")
+            else:
+                st.info(f"No changes made to {platform_name} in {portfolio_name}")
+
 
         
     # TODO: cache with @st.cache_resource

@@ -14,10 +14,10 @@ class Portfolio:
 
         return round(unrealized_gain_loss, 2)
 
-    def calculateCurrentValue(self):
+    def calculateCurrentValue(self) -> float:
         """Calculates the total value of the portfolio."""
         return round(sum(p.calculateBalance() + p.calculateReturn() for p in self.platforms), 2)
     
-    def calculateBalance(self):
+    def calculateBalance(self) -> float:
         """Calculates the total balance of the portfolio."""
         return round(sum(p.calculateBalance() for p in self.platforms), 2)

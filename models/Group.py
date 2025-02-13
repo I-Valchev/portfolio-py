@@ -2,6 +2,7 @@ import pyxirr
 import decimal
 from datetime import date
 from models.Transaction import Transaction
+import streamlit as st
 
 
 class Group:
@@ -9,12 +10,12 @@ class Group:
         self.valuations = []
         self.transactions = []
 
-    def calculateBalance(self):
+    def calculateBalance(self) -> float:
         """Sum of all transaction values (net inflow)."""
         # return decimal.Decimal(sum(t.value for t in self.transactions)).quantize(decimal.Decimal("0.00"))
         return sum(t.value for t in self.transactions)
     
-    def calculateCurrentValue(self):
+    def calculateCurrentValue(self) -> float:
         return self.calculateBalance() + self.calculateReturn()
 
 
@@ -38,14 +39,14 @@ class Group:
 
     def _netInvestments(self, start_date, end_date):
         """Returns total net investments (inflows - outflows) between two dates."""
-        return sum(t.value for t in self.transactions if start_date <= t.date <= end_date)
+        return sum(t.value for t in self.transactions if start_date < t.date < end_date)
 
-    def calculateReturn(self):
+    def calculateReturn(self) -> float:
         """
         Total return = (Final Valuation - Initial Valuation) - Net Investments.
         """
         if not self.valuations:
-            return decimal.Decimal("0.00")
+            return float(0.00)
 
         initial_valuation = self.valuations[0]
         final_valuation = self.valuations[-1]
@@ -61,7 +62,7 @@ class Group:
             Unrealized Gain/Loss % = (Latest Valuation - Net Investments) / Net Investments * 100
         """
         if not self.valuations:
-            return decimal.Decimal("0.00")
+            return float(0.00)
 
         latest = self.valuations[-1]
         net_investments = self._netInvestments(self.valuations[0].date, latest.date)
@@ -75,7 +76,7 @@ class Group:
     def calculatePortfolioShare(self, total_value):
         """Calculates the share of the portfolio's value."""
         if total_value == 0:
-            return decimal.Decimal("0.00")
+            return float(0.00)
 
         return round((self.calculateBalance() + self.calculateReturn()) * 100 / total_value, 2)
 

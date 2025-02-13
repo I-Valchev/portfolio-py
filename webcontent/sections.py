@@ -1,8 +1,11 @@
 
+import hashlib
 import pandas as pd
 import streamlit as st
 
 from lib.Config import Config
+from lib.db.Database import Database
+from lib.db.Models import DbTransaction, DbValuation
 from lib.helpers import availablePortfolios
 from models.Period import Period
 from models.Platform import Platform
@@ -64,3 +67,36 @@ def platform_returns(platform: Platform, periods: [Period], tab: st):
             start_adding = True
     tab.write("Monthly returns")
     tab.table(df)
+
+
+def display_and_edit_objects(portfolio: Portfolio, platform: Platform, objects, object_class, target: st):
+    """Displays the objects in a Streamlit data editor and handles saving edits."""
+    
+    # Extract 'date' and 'value' from each object and build a DataFrame
+    data = [(item.date, item.value) for item in objects]
+    df = pd.DataFrame(data, columns=['date', 'value'])
+
+    # Convert 'date' column to string format for easier editing
+    df['date'] = pd.to_datetime(df['date']).dt.strftime('%d-%m-%Y')
+
+    # Use a unique key for the data editor
+    edited_df = target.data_editor(df, num_rows="dynamic", use_container_width=True)
+
+    if target.button("Save", key=hashlib.sha256(edited_df.to_json().encode()).hexdigest()):
+        # Convert 'date' back to datetime and build the list of the original objects
+        edited_df['date'] = pd.to_datetime(edited_df['date'], format='%d-%m-%Y', errors='coerce')
+
+        if object_class == DbValuation:
+            Database().save_platform_changes(
+                portfolio_name=portfolio.name,
+                platform_name=platform.name,
+                new_valuations=edited_df
+            )
+        elif object_class == DbTransaction:
+            Database().save_platform_changes(
+                portfolio_name=portfolio.name,
+                platform_name=platform.name,
+                new_transactions=edited_df
+            )
+
+        st.rerun()
