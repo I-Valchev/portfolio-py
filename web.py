@@ -1,7 +1,6 @@
 import datetime
 import pandas as pd
 import streamlit as st
-from lib.Entities.GroupEntities import PlatformEntity
 from lib.db.Models import DbTransaction, DbValuation
 from lib.helpers import generateAllPeriods
 from webcontent import newcomer, sections
@@ -11,14 +10,22 @@ st.write('# Portfolio Tracker')
 
 database = Database()
 
-# INPUTS
-[portfolioName, currency] = sections.inputs()
-st.divider()
+def homepage():
+    # INPUTS
+    [portfolioName, currency] = sections.inputs()
+    st.divider()
 
-if portfolioName == None:
-    newcomer.newcomper(st)
+    if portfolioName == None:
+        newcomer.newcomper(st)
+        newcomer.add_new_portfolio(st)
+    else:
+        portfolioPage(portfolioName)
+
+def createNewPage():
     newcomer.add_new_portfolio(st)
-else:
+
+def portfolioPage(portfolioName: str):
+    st.write(f"## {portfolioName}")
     portfolio = database.fetchPortfolioByName(portfolioName)
     sections.key_metrics(portfolio, portfolio.currency, st)
     sections.portfolio_bar(portfolio)
@@ -39,3 +46,10 @@ else:
 
     with tabs[-1]:
         sections.add_new_platform(portfolio, st)
+
+pg = st.navigation(
+    [st.Page(homepage, title="Homepage")] +
+    [st.Page(createNewPage, title="Create New Portfolio")]
+)
+
+pg.run()
