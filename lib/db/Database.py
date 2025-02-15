@@ -1,7 +1,13 @@
 import pymongo
 import streamlit as st
+from lib.Entities.GroupEntities import PlatformEntity
 from lib.Entities.Portfolio import PortfolioEntity
 from lib.db.Models import DbPortfolio, DbTransaction, DbValuation
+from typing import NamedTuple
+
+class OperationResult(NamedTuple):
+    success: bool
+    message: str
 
 
 class Database:
@@ -27,7 +33,18 @@ class Database:
         )
         return [portfolio["name"] for portfolio in dbPortfolios]
     
-    def save_platform_changes(self, portfolio_name: str, platform_name: str, new_valuations: list[DbValuation] = None, new_transactions: list[DbTransaction] = None):
+    def add_new_platform(self, portfolio: PortfolioEntity, platform: PlatformEntity) -> OperationResult:
+        result = self.conn.get_database("all_data").portfolios.update_one(
+            {"name": portfolio.name},
+            {"$push": {"platforms": platform._dbPlatform.model_dump()}}
+        )
+
+        if result.modified_count > 0:
+            return OperationResult(True, f"Platform '{platform.pretty}' added successfully.")
+        else:
+            return OperationResult(False, f"Failed to add platform '{platform.pretty}'.")
+    
+    def save_platform_changes(self, portfolio_name: str, platform_name: str, new_valuations: list[DbValuation] = None, new_transactions: list[DbTransaction] = None) -> OperationResult:
         """Replace valuations or transactions for a specific platform within a portfolio in MongoDB."""
         updates = {}
 
@@ -48,10 +65,11 @@ class Database:
                     "$set": updates  # Replace valuations and/or transactions
                 }
             )
+
             if result.modified_count > 0:
-                st.success(f"Successfully updated {platform_name} in {portfolio_name}")
+                return OperationResult(True, f"Platform '{platform_name}' added successfully.")
             else:
-                st.info(f"No changes made to {platform_name} in {portfolio_name}")
+                return OperationResult(False, f"Failed to add platform '{platform_name}'.")
 
     def __parse_portfolio(self, data: dict) -> PortfolioEntity:
         if data:

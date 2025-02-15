@@ -77,9 +77,10 @@ def display_and_edit_objects(portfolio: PortfolioEntity, platform: PlatformEntit
     df['date'] = pd.to_datetime(df['date']).dt.strftime('%d-%m-%Y')
 
     # Use a unique key for the data editor
-    edited_df = target.data_editor(df, num_rows="dynamic", use_container_width=True)
+    key = f"{portfolio.name}-{platform.name}-{object_class.__name__}"
+    edited_df = target.data_editor(df, num_rows="dynamic", use_container_width=True, key=key)
 
-    if target.button("Save", key=hashlib.sha256(edited_df.to_json().encode()).hexdigest()):
+    if target.button("Save", key=f"{key}-save"):
         # Convert 'date' back to datetime and build the list of the original objects
         edited_df['date'] = pd.to_datetime(edited_df['date'], format='%d-%m-%Y', errors='coerce')
 

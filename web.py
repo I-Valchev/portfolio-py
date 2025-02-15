@@ -1,6 +1,7 @@
 import datetime
 import pandas as pd
 import streamlit as st
+from lib.Entities.GroupEntities import PlatformEntity
 from lib.db.Models import DbTransaction, DbValuation
 from lib.helpers import generateAllPeriods
 from webcontent import newcomer, sections
@@ -21,11 +22,11 @@ else:
     sections.key_metrics(portfolio, portfolio.currency, st)
     sections.portfolio_bar(portfolio)
 
-    tabs = st.tabs([str(platform) for platform in portfolio.platforms])
+    tabs = st.tabs([str(platform) for platform in portfolio.platforms] + ["*+*"])
 
     periods = generateAllPeriods(datetime.datetime(2025, 1, 1), datetime.datetime.today())
 
-    for platform, tab in zip(portfolio.platforms, tabs):
+    for platform, tab in zip(portfolio.platforms, tabs[:-1]):
         sections.key_metrics(platform, portfolio.currency, tab)
         sections.platform_metrics(platform, portfolio, tab)
         tab.divider()
@@ -34,3 +35,21 @@ else:
             sections.display_and_edit_objects(portfolio, platform, platform.valuations, DbValuation, st)
         with tab.expander("Transactions"):
             sections.display_and_edit_objects(portfolio, platform, platform.transactions, DbTransaction, st)
+
+    with tabs[-1]:
+        st.write('## Add a new Platform')
+
+        platform_name = st.text_input('Platform Name')
+
+        if st.button("Create Platform"):
+            if platform_name:
+                new_platform = PlatformEntity.new(pretty=platform_name)
+                result = Database().add_new_platform(portfolio, new_platform)
+                st.rerun()
+                if result:
+                    st.success(result.message)
+                else:
+                    st.warning(result.message)
+
+            else:
+                st.warning("Please enter a platform name")

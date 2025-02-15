@@ -1,4 +1,5 @@
 import decimal
+import re
 from lib.Entities.BasicEntities import TransactionEntity, ValuationEntity
 from lib.db.Models import DbPlatform
 from dateutil.relativedelta import relativedelta
@@ -93,6 +94,24 @@ class PlatformEntity(Group):
         self._dbPlatform = dbPlatform
         self.__fillInitialValuation(self.transactions)
 
+    @classmethod
+    def new(cls, name: str = None, pretty: str = None, color: str = None):
+        """Factory method to create a new PlatformEntity at runtime"""
+        if pretty and not name:
+            name = re.sub(r"\s+", "_", pretty.lower())  # Convert spaces to underscores and lowercase it
+        
+        if not name:
+            raise ValueError("A platform must have a name or a pretty name.")
+
+        dbPlatform = DbPlatform(
+            name=name,
+            pretty=pretty or name,
+            color=color or "#000000",
+            transactions=[],
+            valuations=[]
+        )
+        return cls(dbPlatform)
+
     @property
     def name(self):
         return self._dbPlatform.name
@@ -131,7 +150,7 @@ class PlatformEntity(Group):
 
         earliest = transactionsBeforeValuation[0]
 
-        initial = ValuationEntity(None, earliest.date + relativedelta(days=-1), 0)
+        initial = ValuationEntity.new(earliest.date + relativedelta(days=-1), 0)
         self.valuations.insert(0, initial)
 
 

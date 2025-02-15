@@ -19,11 +19,13 @@ class TransactionEntity:
         return self.date.strftime("%d.%m.%Y")+" : " + str(self.value)
 
 class ValuationEntity:
-    def __init__(self, dbValuation: DbValuation = None, date: datetime.datetime = datetime.datetime.now(), value: float = 0):
-        if dbValuation is None:
-            dbValuation = DbValuation(date=date, value=value)
+    def __init__(self, dbValuation: DbValuation):
         self._dbValuation = dbValuation
-    
+
+    @classmethod
+    def new(cls, date: datetime.datetime = datetime.datetime.now(), value: float = 0):
+        return cls(DbValuation(date=date, value=value))
+
     @property
     def date(self):
         date = self._dbValuation.date
