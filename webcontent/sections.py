@@ -98,3 +98,21 @@ def display_and_edit_objects(portfolio: PortfolioEntity, platform: PlatformEntit
             )
 
         st.rerun()
+
+def add_new_platform(portfolio: PortfolioEntity, target: st):
+    target.write('## Add a new Platform')
+
+    platform_name = target.text_input('Platform Name')
+
+    if target.button("Create Platform"):
+        if platform_name:
+            new_platform = PlatformEntity.new(pretty=platform_name)
+            result = Database().add_new_platform(portfolio, new_platform)
+            st.rerun()
+            if result:
+                target.success(result.message)
+            else:
+                target.warning(result.message)
+
+        else:
+            target.warning("Please enter a platform name")

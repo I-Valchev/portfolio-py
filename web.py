@@ -17,6 +17,7 @@ st.divider()
 
 if portfolioName == None:
     newcomer.newcomper(st)
+    newcomer.add_new_portfolio(st)
 else:
     portfolio = database.fetchPortfolioByName(portfolioName)
     sections.key_metrics(portfolio, portfolio.currency, st)
@@ -37,19 +38,4 @@ else:
             sections.display_and_edit_objects(portfolio, platform, platform.transactions, DbTransaction, st)
 
     with tabs[-1]:
-        st.write('## Add a new Platform')
-
-        platform_name = st.text_input('Platform Name')
-
-        if st.button("Create Platform"):
-            if platform_name:
-                new_platform = PlatformEntity.new(pretty=platform_name)
-                result = Database().add_new_platform(portfolio, new_platform)
-                st.rerun()
-                if result:
-                    st.success(result.message)
-                else:
-                    st.warning(result.message)
-
-            else:
-                st.warning("Please enter a platform name")
+        sections.add_new_platform(portfolio, st)

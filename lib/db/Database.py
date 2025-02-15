@@ -43,6 +43,15 @@ class Database:
             return OperationResult(True, f"Platform '{platform.pretty}' added successfully.")
         else:
             return OperationResult(False, f"Failed to add platform '{platform.pretty}'.")
+        
+    def add_new_portfolio(self, portfolio: PortfolioEntity):
+        # Add the new portfolio to the database
+        result = self.conn.get_database("all_data").portfolios.insert_one(portfolio._dbPortfolio.model_dump())
+        
+        if result.acknowledged:
+            return OperationResult(success=True, message=f"Portfolio '{portfolio.name}' added successfully.")
+        else:
+            return OperationResult(success=False, message="Failed to add the portfolio.")
     
     def save_platform_changes(self, portfolio_name: str, platform_name: str, new_valuations: list[DbValuation] = None, new_transactions: list[DbTransaction] = None) -> OperationResult:
         """Replace valuations or transactions for a specific platform within a portfolio in MongoDB."""

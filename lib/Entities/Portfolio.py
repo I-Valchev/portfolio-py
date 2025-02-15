@@ -5,6 +5,16 @@ from lib.db.Models import DbPortfolio
 class PortfolioEntity:
     def __init__(self, dbPortfolio: DbPortfolio):
         self._dbPortfolio = dbPortfolio
+
+    @classmethod
+    def new(cls, name: str, currency: str = "EUR"):
+        """Factory method to create a new PortfolioEntity at runtime"""
+        dbPortfolio = DbPortfolio(
+            name=name,
+            currency=currency,
+            platforms=[]  # Start with an empty list of platforms
+        )
+        return cls(dbPortfolio)
     
     @property
     def name(self):
