@@ -1,4 +1,29 @@
-class Portfolio:
+from lib.Entities.GroupEntities import PlatformEntity
+from lib.db.Models import DbPortfolio
+
+
+class PortfolioEntity:
+    def __init__(self, dbPortfolio: DbPortfolio):
+        self._dbPortfolio = dbPortfolio
+    
+    @property
+    def name(self):
+        return self._dbPortfolio.name
+    
+    @property
+    def currency(self):
+        return self._dbPortfolio.currency
+    
+    @property
+    def platforms(self):
+        return list(map(lambda p: PlatformEntity(p), self._dbPortfolio.platforms))
+    
+    def __repr__(self):
+        return self.name
+
+    def __str__(self):
+        return self.name
+
     def unrealisedGainLoss(self):
         """
         Calculates the unrealized gain/loss percentage for the entire portfolio,
@@ -17,7 +42,7 @@ class Portfolio:
     def calculateCurrentValue(self) -> float:
         """Calculates the total value of the portfolio."""
         return round(sum(p.calculateBalance() + p.calculateReturn() for p in self.platforms), 2)
-    
+
     def calculateBalance(self) -> float:
         """Calculates the total balance of the portfolio."""
         return round(sum(p.calculateBalance() for p in self.platforms), 2)

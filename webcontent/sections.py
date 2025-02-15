@@ -2,14 +2,11 @@
 import hashlib
 import pandas as pd
 import streamlit as st
-
-from lib.Config import Config
+from lib.Entities.GroupEntities import PeriodEntity, PlatformEntity
+from lib.Entities.Portfolio import PortfolioEntity
 from lib.db.Database import Database
 from lib.db.Models import DbTransaction, DbValuation
 from lib.helpers import availablePortfolios
-from models.Period import Period
-from models.Platform import Platform
-from models.Portfolio import Portfolio
 
 
 def inputs():
@@ -20,14 +17,14 @@ def inputs():
 
     return [portfolio, currency]
 
-def key_metrics(portfolio: Portfolio | Platform, currency: str, target: st):
+def key_metrics(portfolio: PortfolioEntity | PlatformEntity, currency: str, target: st):
     col1, col2 = target.columns(2)
 
     delta = "{:.2f}".format(portfolio.calculateCurrentValue() - portfolio.calculateBalance())
     col1.metric(label='Portfolio Value', value=f"{portfolio.calculateCurrentValue()} {currency}", delta=f"{delta}")
     col2.metric(label='Unrealized Gain/Loss', value=f"{portfolio.unrealisedGainLoss()} %")
 
-def portfolio_bar(portfolio: Portfolio):
+def portfolio_bar(portfolio: PortfolioEntity):
     # Extract names and balances
     platform_names = [str(platform) for platform in portfolio.platforms]
     platform_balances = [int(platform.calculateCurrentValue()) for platform in portfolio.platforms]
@@ -41,12 +38,12 @@ def portfolio_bar(portfolio: Portfolio):
 
     st.bar_chart(data, x='Platform', y='Value')
 
-def platform_metrics(plaform: Platform, portfolio: Portfolio, target: st):
+def platform_metrics(plaform: PlatformEntity, portfolio: PortfolioEntity, target: st):
     col1, col2 = target.columns(2)
 
     col1.metric(label='Portfolio Share', value=f"{plaform.calculatePortfolioShare(portfolio.calculateCurrentValue())} %")
 
-def platform_returns(platform: Platform, periods: [Period], tab: st):
+def platform_returns(platform: PlatformEntity, periods: list[PeriodEntity], tab: st):
     df = pd.DataFrame(columns=["Period", "Return"])
 
     start_adding = False
@@ -69,7 +66,7 @@ def platform_returns(platform: Platform, periods: [Period], tab: st):
     tab.table(df)
 
 
-def display_and_edit_objects(portfolio: Portfolio, platform: Platform, objects, object_class, target: st):
+def display_and_edit_objects(portfolio: PortfolioEntity, platform: PlatformEntity, objects, object_class, target: st):
     """Displays the objects in a Streamlit data editor and handles saving edits."""
     
     # Extract 'date' and 'value' from each object and build a DataFrame
