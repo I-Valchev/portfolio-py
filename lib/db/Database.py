@@ -1,7 +1,7 @@
 import pymongo
 import streamlit as st
-
-from lib.db.Models import DbTransaction, DbValuation, parse_portfolio
+from lib.Entities.Portfolio import PortfolioEntity
+from lib.db.Models import DbPortfolio, DbTransaction, DbValuation
 
 
 class Database:
@@ -10,18 +10,16 @@ class Database:
         self._ttl = '10m'
 
     # TODO: cache with @st.cache_data(ttl=1)
-    def readPortfolios(self):
+    def readPortfolios(self) -> list[PortfolioEntity]:
         dbPortfolios = self.conn.get_database("all_data").portfolios.find(limit=3)
-        return [parse_portfolio(item) for item in dbPortfolios]
+        return [self.__parse_portfolio(item) for item in dbPortfolios]
     
-    def fetchPortfolioByName(self, name: str):
+    def fetchPortfolioByName(self, name: str) -> PortfolioEntity:
         dbPortfolio = self.conn.get_database("all_data").portfolios.find_one({"name": name})
-        if dbPortfolio:
-            return parse_portfolio(dbPortfolio)
-        return None 
+        return self.__parse_portfolio(dbPortfolio) if dbPortfolio else None
 
     
-    def fetchAllPortfolioNames(self):
+    def fetchAllPortfolioNames(self) -> list[str]:
         # Query for all portfolios, returning only the 'name' field
         dbPortfolios = self.conn.get_database("all_data").portfolios.find(
             {},  # No filter, get all portfolios
@@ -55,8 +53,16 @@ class Database:
             else:
                 st.info(f"No changes made to {platform_name} in {portfolio_name}")
 
+    def __parse_portfolio(self, data: dict) -> PortfolioEntity:
+        if data:
+            # Convert ObjectId to string (since Pydantic doesn’t support ObjectId)
+            data["id"] = str(data["_id"])  # Add 'id' field for Pydantic
+            del data["_id"]  # Remove '_id' since it's not part of the Pydantic model
 
-        
+            # Create and return the Portfolio instance
+            return PortfolioEntity(DbPortfolio(**data))
+        return None
+
     # TODO: cache with @st.cache_resource
     def __init_connection(self):
         return pymongo.MongoClient(**st.secrets["mongo"])
