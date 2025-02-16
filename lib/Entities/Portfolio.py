@@ -39,7 +39,7 @@ class PortfolioEntity:
         Calculates the unrealized gain/loss percentage for the entire portfolio,
         based on all platforms combined.
         """
-        total_value = sum(p.calculateBalance() + p.calculateReturn() for p in self.platforms)
+        total_value = sum(p.calculateCurrentValue() for p in self.platforms)
         total_invested = sum(p.calculateBalance() for p in self.platforms)
 
         if total_invested > 0:
@@ -51,7 +51,7 @@ class PortfolioEntity:
 
     def calculateCurrentValue(self) -> float:
         """Calculates the total value of the portfolio."""
-        return round(sum(p.calculateBalance() + p.calculateReturn() for p in self.platforms), 2)
+        return round(sum(p.calculateCurrentValue() for p in self.platforms), 2)
 
     def calculateBalance(self) -> float:
         """Calculates the total balance of the portfolio."""

@@ -3,6 +3,7 @@ import re
 from lib.Entities.BasicEntities import TransactionEntity, ValuationEntity
 from lib.db.Models import DbPlatform
 from dateutil.relativedelta import relativedelta
+import streamlit as st
 
 
 class Group:
@@ -12,11 +13,10 @@ class Group:
 
     def calculateBalance(self) -> float:
         """Sum of all transaction values (net inflow)."""
-        # return decimal.Decimal(sum(t.value for t in self.transactions)).quantize(decimal.Decimal("0.00"))
         return sum(t.value for t in self.transactions)
     
     def calculateCurrentValue(self) -> float:
-        return self.calculateBalance() + self.calculateReturn()
+        return self.valuations[-1].value if self.valuations else 0.00
 
 
     def calculateXirr(self):
@@ -47,11 +47,18 @@ class Group:
         """
         if not self.valuations:
             return float(0.00)
+        
+        # TODO: THIS IS INCORRECT CALCULATION
 
         initial_valuation = self.valuations[0]
         final_valuation = self.valuations[-1]
 
+        # st.write(f"Initial Valuation: {initial_valuation.value} on {initial_valuation.date}")
+        # st.write(f"Final Valuation: {final_valuation.value} on {final_valuation.date}")
+
         net_investments = self._netInvestments(initial_valuation.date, final_valuation.date)
+        # net_investments = 0
+        # st.write(f"Net Investments: {net_investments}")
 
         return (final_valuation.value - initial_valuation.value) - net_investments
 
@@ -65,7 +72,7 @@ class Group:
             return float(0.00)
 
         latest = self.valuations[-1]
-        net_investments = self._netInvestments(self.valuations[0].date, latest.date)
+        net_investments = sum(t.value for t in self.transactions)
 
         if net_investments == 0:
             return decimal.Decimal("0.00")  # Avoid division by zero

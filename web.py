@@ -38,7 +38,7 @@ def portfolioPage(portfolioName: str):
         sections.key_metrics(platform, portfolio.currency, tab)
         sections.platform_metrics(platform, portfolio, tab)
         tab.divider()
-        sections.platform_returns(platform, periods, tab)
+        # sections.platform_returns(platform, periods, tab)
         with tab.expander("Valuations"):
             sections.display_and_edit_objects(portfolio, platform, platform.valuations, DbValuation, st)
         with tab.expander("Transactions"):
